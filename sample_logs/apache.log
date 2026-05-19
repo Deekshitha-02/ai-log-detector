@@ -1,0 +1,10 @@
+192.168.1.50 - - [15/Jan/2024:10:15:01] "GET /admin/config.php HTTP/1.1" 404 512
+192.168.1.50 - - [15/Jan/2024:10:15:02] "GET /wp-admin/setup-config.php HTTP/1.1" 404 512
+192.168.1.50 - - [15/Jan/2024:10:15:03] "GET /../../../etc/passwd HTTP/1.1" 400 512
+192.168.1.50 - - [15/Jan/2024:10:15:04] "GET /phpmyadmin/ HTTP/1.1" 404 512
+10.0.0.22 - - [15/Jan/2024:10:20:01] "GET /index.php?id=1' OR '1'='1 HTTP/1.1" 200 1024
+10.0.0.22 - - [15/Jan/2024:10:20:02] "GET /search?q=<script>alert('xss')</script> HTTP/1.1" 200 512
+10.0.0.22 - - [15/Jan/2024:10:20:03] "GET /index.php?id=1 UNION SELECT * FROM users HTTP/1.1" 200 2048
+185.220.101.5 - - [15/Jan/2024:10:30:01] "GET /robots.txt HTTP/1.1" 200 512
+185.220.101.5 - - [15/Jan/2024:10:30:02] "GET /.git/config HTTP/1.1" 200 256
+185.220.101.5 - - [15/Jan/2024:10:30:03] "GET /.env HTTP/1.1" 200 128

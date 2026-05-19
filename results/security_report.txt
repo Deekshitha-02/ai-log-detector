@@ -1,0 +1,227 @@
+=== SECURITY ANALYSIS REPORT ===
+Generated: 2026-05-18 20:51:23
+========================================
+
+=== IP REPUTATION CHECK ===
+IP: 10.0.0.55
+   Country: Unknown
+   ISP: Unknown
+
+IP: 192.168.1.105
+   Country: Unknown
+   ISP: Unknown
+
+IP: 192.168.1.100
+   Country: Unknown
+   ISP: Unknown
+
+IP: 185.220.101.1
+   Country: Germany
+   ISP: Stiftung Erneuerbare Freiheit
+
+========================================
+
+# 🔒 Security Log Analysis Report
+**Analysis Date:** January 15 | **Analyst:** Automated Threat Detection System
+
+---
+
+## ⚠️ IDENTIFIED THREATS
+
+---
+
+### THREAT #1 — SSH Brute Force Attack + Successful Root Compromise
+```
+┌─────────────────────────────────────────────────────────────┐
+│  THREAT TYPE  │ Brute Force Attack → Successful Compromise  │
+│  SEVERITY     │ 🔴 CRITICAL                                  │
+│  THREAT SCORE │ ████████████ 9.5/10                         │
+│  SOURCE IP    │ 192.168.1.100 | Unknown (Internal Network)  │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Timeline of Events:**
+| Time | Event |
+|------|-------|
+| `10:23:11` | Failed SSH login attempt → user: `root` |
+| `10:23:12` | Failed SSH login attempt → user: `root` |
+| `10:23:13` | Failed SSH login attempt → user: `root` |
+| `10:23:14` | Failed SSH login attempt → user: `admin` |
+| `10:23:15` | Failed SSH login attempt → user: `admin` |
+| `10:30:00` | ✅ **SUCCESSFUL root login achieved** ← CRITICAL EVENT |
+
+**Analysis Notes:**
+- 5 failed attempts across 2 accounts (`root`, `admin`) within **4 seconds**
+- Attack pace (~1 attempt/sec) is consistent with **automated brute-force tooling**
+- Attacker ultimately succeeded with **root access** — full system compromise likely
+- Internal IP source suggests **compromised internal host** or **malicious insider**
+
+**Recommended Immediate Actions:**
+```diff
+! EMERGENCY: Terminate active root session from 192.168.1.100 immediately
+! Isolate 192.168.1.100 from the network — quarantine the host
+! Audit all commands run under the compromised root session
+! Rotate ALL credentials on the affected server
+! Review sudoers file and privileged access logs
+```
+
+---
+
+### THREAT #2 — SSH Brute Force Attack (Internal)
+```
+┌─────────────────────────────────────────────────────────────┐
+│  THREAT TYPE  │ Brute Force / Credential Stuffing           │
+│  SEVERITY     │ 🟠 HIGH                                      │
+│  THREAT SCORE │ ████████░░ 7.5/10                           │
+│  SOURCE IP    │ 10.0.0.55 | Unknown (Internal Network)      │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Timeline of Events:**
+| Time | Event |
+|------|-------|
+| `10:25:00` | Failed SSH login attempt → user: `root` |
+| `10:25:01` | Failed SSH login attempt → user: `root` |
+| `10:25:02` | Failed SSH login attempt → user: `root` |
+
+**Analysis Notes:**
+- 3 rapid sequential root login failures within **2 seconds**
+- Second internal host conducting brute-force activity
+- Could indicate **lateral movement**, **worm propagation**, or a **coordinated insider attack**
+- Attack stopped (possibly blocked, or attacker pivoted)
+
+**Recommended Immediate Actions:**
+```diff
+! Block 10.0.0.55 at the network level immediately
+! Isolate and forensically image 10.0.0.55
+! Cross-reference with Threat #1 — possible coordinated attack
+! Check for shared malware or tooling between 10.0.0.55 and 192.168.1.100
+```
+
+---
+
+### THREAT #3 — Suspicious User Login (Lateral Movement Indicator)
+```
+┌─────────────────────────────────────────────────────────────┐
+│  THREAT TYPE  │ Suspicious Access / Potential Lateral Move  │
+│  SEVERITY     │ 🟡 MEDIUM                                    │
+│  THREAT SCORE │ ██████░░░░ 5.5/10                           │
+│  SOURCE IP    │ 192.168.1.105 | Unknown (Internal Network)  │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Timeline of Events:**
+| Time | Event |
+|------|-------|
+| `10:24:01` | ✅ Successful SSH login → user: `nathan` |
+| `10:35:00` | `sudo` execution attempted — **command not found** error |
+
+**Analysis Notes:**
+- Login itself appears legitimate (password accepted, named user account)
+- `command not found` in sudo context suggests **unfamiliar environment** or **running a script built for a different OS/path**
+- Timing places this login **between two active brute-force campaigns** — suspicious correlation
+- Could be a legitimate user, **a compromised account**, or an attacker who already had `nathan`'s credentials
+
+**Recommended Immediate Actions:**
+```diff
+~ Verify with 'nathan' whether this login was intentional
+~ Review all commands executed during nathan's session
+~ Check if nathan's credentials were exposed in any recent breach
+~ Monitor this session/account for further suspicious activity
+```
+
+---
+
+### THREAT #4 — Tor Exit Node / Known Malicious Infrastructure Probe
+```
+┌─────────────────────────────────────────────────────────────┐
+│  THREAT TYPE  │ External Reconnaissance / Tor Exit Node     │
+│  SEVERITY     │ 🟠 HIGH                                      │
+│  THREAT SCORE │ ███████░░░ 7.0/10                           │
+│  SOURCE IP    │ 185.220.101.1 | Germany (Stiftung           │
+│               │ Erneuerbare Freiheit — known Tor node)      │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Timeline of Events:**
+| Time | Event |
+|------|-------|
+| `10:40:00` | SSH connection initiated then **immediately closed** from known Tor exit node |
+
+**Analysis Notes:**
+- `185.220.101.1` is a **well-documented Tor exit node** operated by a German anonymization network
+- Connection closed immediately — consistent with **port scanning**, **banner grabbing**, or **failed authentication probing**
+- Tor exit nodes are commonly used to **anonymize attacks** — this could be pre-attack reconnaissance
+- External threat actor appears to have SSH exposed to the internet — **significant attack surface**
+
+**Recommended Immediate Actions:**
+```diff
+! Block 185.220.101.1 and the entire associated Tor exit node range at the firewall
+! Immediately restrict SSH (port 22) access — whitelist-only or move to non-standard port
+! Implement geographic IP blocking for high-risk regions if SSH must remain open
+! Enable fail2ban or equivalent with aggressive Tor exit node blocklists
+```
+
+---
+
+## 📊 OVERALL RISK ASSESSMENT
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                    OVERALL RISK SCORE                            │
+│                                                                  │
+│   ████████████████████░░  9.2 / 10   🔴 CRITICAL                │
+│                                                                  │
+│  Rationale: Active root compromise confirmed on internal server  │
+│  with simultaneous multi-source attack activity and external     │
+│  reconnaissance from anonymized infrastructure.                  │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+### Threat Score Summary
+| # | Threat | Score | Severity |
+|---|--------|-------|----------|
+| 1 | Brute Force + Root Compromise (192.168.1.100) | 9.5/10 | 🔴 Critical |
+| 2 | Brute Force Attack (10.0.0.55) | 7.5/10 | 🟠 High |
+| 3 | Suspicious Login + Sudo Anomaly (192.168.1.105) | 5.5/10 | 🟡 Medium |
+| 4 | Tor Exit Node Probe (185.220.101.1) | 7.0/10 | 🟠 High |
+
+---
+
+## 🎯 TOP 3 PRIORITY ACTIONS
+
+```
+╔══════════════════════════════════════════════════════════════════╗
+║  PRIORITY 1 — IMMEDIATE (Next 15 minutes)                       ║
+║                                                                  ║
+║  🔴 Kill the active root session from 192.168.1.100 and         ║
+║     isolate that host. A confirmed root compromise is your       ║
+║     most critical exposure right now. Assume full system         ║
+║     breach until forensics prove otherwise.                      ║
+╠══════════════════════════════════════════════════════════════════╣
+║  PRIORITY 2 — SHORT-TERM (Next 1 hour)                          ║
+║                                                                  ║
+║  🟠 Restrict SSH access immediately. Disable root SSH login      ║
+║     (PermitRootLogin no), implement key-based auth only,         ║
+║     and move SSH off port 22 or place behind a VPN.             ║
+║     Block all Tor exit nodes at the perimeter firewall.          ║
+╠══════════════════════════════════════════════════════════════════╣
+║  PRIORITY 3 — MEDIUM-TERM (Next 24 hours)                       ║
+║                                                                  ║
+║  🟡 Conduct full incident response investigation. Forensically   ║
+║     image all affected hosts (192.168.1.100, 10.0.0.55).        ║
+║     Audit all accounts, rotate all credentials, and review       ║
+║     whether data exfiltration occurred during root session.      ║
+╚══════════════════════════════════════════════════════════════════╝
+```
+
+---
+
+## 📋 EXECUTIVE SUMMARY
+
+> A **critical security incident is actively in progress**. A confirmed brute-force attack from internal host `192.168.1.100` successfully achieved **root-level access** to the server at 10:30 AM, representing a full system compromise. Simultaneously, a second internal host (`10.0.0.55`) conducted parallel brute-force activity, and an external Tor exit node probed the server's SSH port — strongly suggesting a **coordinated, multi-vector attack campaign** potentially involving compromised internal infrastructure or a malicious insider.
+
+> **Immediate executive action is required**: the affected server should be considered fully compromised, all active sessions must be terminated, and an incident response procedure should be initiated within the next 15 minutes to contain the breach, preserve forensic evidence, and assess the scope of any data exfiltration or lateral movement.
+
+---
+*Report generated by Automated Threat Analysis Engine | Confidence Level: High | Log Coverage: Jan 15, 10:23–10:40*

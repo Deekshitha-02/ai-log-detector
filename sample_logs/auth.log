@@ -1,0 +1,12 @@
+Jan 15 10:23:11 server sshd[1234]: Failed password for root from 192.168.1.100 port 22
+Jan 15 10:23:12 server sshd[1234]: Failed password for root from 192.168.1.100 port 22
+Jan 15 10:23:13 server sshd[1234]: Failed password for root from 192.168.1.100 port 22
+Jan 15 10:23:14 server sshd[1234]: Failed password for admin from 192.168.1.100 port 22
+Jan 15 10:23:15 server sshd[1234]: Failed password for admin from 192.168.1.100 port 22
+Jan 15 10:24:01 server sshd[1234]: Accepted password for nathan from 192.168.1.105 port 22
+Jan 15 10:25:00 server sshd[1234]: Failed password for root from 10.0.0.55 port 22
+Jan 15 10:25:01 server sshd[1234]: Failed password for root from 10.0.0.55 port 22
+Jan 15 10:25:02 server sshd[1234]: Failed password for root from 10.0.0.55 port 22
+Jan 15 10:30:00 server sshd[1234]: Accepted password for root from 192.168.1.100 port 22
+Jan 15 10:35:00 server sudo[1234]: nathan : command not found
+Jan 15 10:40:00 server sshd[1234]: Connection closed by 185.220.101.1 port 22
